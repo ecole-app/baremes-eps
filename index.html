@@ -719,7 +719,7 @@ const SPORTS = [
       seances:'8–10',
       ca_texte:"Lire une carte simplifiée et se repérer dans un espace connu. Trouver des balises en binôme. Respecter les limites de sécurité.",
       criteres:[
-        { id:'balises', label:'📍 Balises trouvées', max:7, hint:'Parcours en score — durée et nb balises configurables ci-dessus',
+        { id:'balises', label:'📍 Balises trouvées', max:7, hint:'Parcours en score 12 min en binôme',
           sous:null,
           table:[['Score ≥ 80%','7'],['60–79%','5–6'],['40–59%','3–4'],['20–39%','2'],['< 20%','1']] },
         { id:'carte', label:'🗺 Lecture de carte', max:5, hint:'Orientée la carte correctement, utilise les symboles',
@@ -737,7 +737,7 @@ const SPORTS = [
       seances:'8–10',
       ca_texte:"Lire une carte et se repérer dans l'espace réel. Planifier son parcours, prendre des décisions autonomes. Gérer sa sécurité.",
       criteres:[
-        { id:'balises', label:'📍 Balises trouvées', max:7, hint:'Parcours en score — durée et nb balises configurables ci-dessus',
+        { id:'balises', label:'📍 Balises trouvées', max:7, hint:'Parcours en score 15–20 min individuel',
           sous:null,
           table:[['Score ≥ 90%','7'],['70–89%','5–6'],['50–69%','3–4'],['30–49%','2'],['< 30%','1']] },
         { id:'strat', label:'🧠 Stratégie de parcours', max:5, hint:'Itinéraire optimisé, ordre des balises',
@@ -837,17 +837,17 @@ function setCycle(c) {
   document.getElementById('btn-c4').classList.toggle('active', c==='c4');
   document.getElementById('home-sub').textContent =
     c==='c3' ? '15 APSA · Cycle 3 — 6e' : '15 APSA · Cycle 4 — 5e / 4e / 3e';
-  document.querySelectorAll('.cycle-block').forEach(el => {
+  document.querySelectorAll('.cycle-block').forEach(function(el) {
     el.classList.toggle('active', el.dataset.cycle === c);
   });
   // Mettre à jour le sous-titre du sport actif
-  const activePanel = document.querySelector('.sport-panel.active');
-  if(activePanel && activePanel.id !== 'panel-home') {
-    const sid = activePanel.id.replace('panel-','');
-    const sport = SPORTS.find(s=>s.id===sid);
-    if(sport) {
-      const sub = document.getElementById(sid+'-sub');
-      if(sub) sub.textContent = sport[c].seances + ' séances · Cycle ' + (c==='c3'?'3 — 6e':'4 — 5e/4e/3e');
+  var ap = document.querySelector('.sport-panel.active');
+  if(ap && ap.id !== 'panel-home') {
+    var sid = ap.id.replace('panel-','');
+    var sp = SPORTS.find(function(s){ return s.id===sid; });
+    if(sp) {
+      var sub = document.getElementById(sid+'-sub');
+      if(sub) sub.textContent = sp[c].seances + ' séances · Cycle ' + (c==='c3'?'3 — 6e':'4 — 5e/4e/3e');
     }
   }
   buildHome();
@@ -909,45 +909,55 @@ function buildPanels() {
     panel.innerHTML=buildPanelHTML(s);
     container.appendChild(panel);
     ['c3','c4'].forEach(cyc => initBtns(s,cyc));
-    // CO: inject config block
-    if(s.id==='course-orientation') {
-      ['c3','c4'].forEach(cyc => {
-        const block = document.getElementById('course-orientation-'+cyc+'-block');
-        if(!block) return;
-        const cfg = document.createElement('div');
-        cfg.id = 'co-cfg-'+cyc;
-        cfg.style.cssText = 'background:var(--white);border-radius:12px;padding:16px 18px;margin-bottom:14px;box-shadow:0 2px 12px rgba(14,124,123,.08);border:2px solid var(--teal-l)';
-        cfg.innerHTML = `
-          <p style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:12px">⚙️ Paramètres de l'évaluation</p>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
-            <div>
-              <label style="font-size:.75rem;font-weight:600;color:var(--muted);display:block;margin-bottom:5px">⏱ Durée (min)</label>
-              <div style="display:flex;align-items:center;gap:8px">
-                <button onclick="coAdj('${cyc}','duree',-5)" style="width:30px;height:30px;border-radius:7px;border:1.5px solid var(--gray);background:var(--bg);font-size:1rem;cursor:pointer;font-weight:600;color:var(--muted)">−</button>
-                <span id="co-duree-${cyc}" style="font-family:'Bebas Neue',sans-serif;font-size:1.5rem;color:var(--teal);min-width:40px;text-align:center">${cyc==='c3'?'30':'40'}</span>
-                <span style="font-size:.75rem;color:var(--muted)">min</span>
-                <button onclick="coAdj('${cyc}','duree',5)" style="width:30px;height:30px;border-radius:7px;border:1.5px solid var(--gray);background:var(--bg);font-size:1rem;cursor:pointer;font-weight:600;color:var(--muted)">+</button>
-              </div>
-            </div>
-            <div>
-              <label style="font-size:.75rem;font-weight:600;color:var(--muted);display:block;margin-bottom:5px">📍 Nb balises total</label>
-              <div style="display:flex;align-items:center;gap:8px">
-                <button onclick="coAdj('${cyc}','balises',-5)" style="width:30px;height:30px;border-radius:7px;border:1.5px solid var(--gray);background:var(--bg);font-size:1rem;cursor:pointer;font-weight:600;color:var(--muted)">−</button>
-                <span id="co-balises-${cyc}" style="font-family:'Bebas Neue',sans-serif;font-size:1.5rem;color:var(--teal);min-width:40px;text-align:center">30</span>
-                <button onclick="coAdj('${cyc}','balises',5)" style="width:30px;height:30px;border-radius:7px;border:1.5px solid var(--gray);background:var(--bg);font-size:1rem;cursor:pointer;font-weight:600;color:var(--muted)">+</button>
-              </div>
-            </div>
-          </div>
-          <div style="background:var(--bg);border-radius:8px;padding:10px 12px">
-            <p style="font-size:.72rem;font-weight:600;color:var(--muted);margin-bottom:6px">Barème adapté — balises trouvées / ${cyc==='c3'?'30':'30'}</p>
-            <div id="co-bareme-${cyc}" style="font-size:.75rem;color:var(--text);line-height:1.8"></div>
-          </div>`;
-        // Insert before the first saisie div
-        const saisieDiv = document.getElementById('course-orientation-'+cyc+'-saisie');
-        if(saisieDiv) block.insertBefore(cfg, saisieDiv);
-        updateCoBareme(cyc);
-      });
+  });
+  // CO config blocks
+  ['c3','c4'].forEach(function(cyc) {
+    var block = document.getElementById('course-orientation-'+cyc+'-block');
+    if(!block) return;
+    var cfg = document.createElement('div');
+    cfg.style.cssText = 'background:var(--white);border-radius:12px;padding:16px 18px;margin-bottom:14px;box-shadow:0 2px 12px rgba(14,124,123,.08);border:2px solid var(--teal-l)';
+    var defDuree = cyc==='c3' ? 30 : 40;
+    // Build cfg via DOM (avoid quoting hell)
+    var btnStyle = 'width:32px;height:32px;border-radius:7px;border:1.5px solid var(--gray);background:var(--bg);font-size:1.1rem;cursor:pointer;font-weight:700';
+    function mkRow(labelTxt, paramName, displayId, defVal) {
+      var row = document.createElement('div');
+      var lbl = document.createElement('label');
+      lbl.style.cssText = 'font-size:.75rem;font-weight:600;color:var(--muted);display:block;margin-bottom:5px';
+      lbl.textContent = labelTxt;
+      var wrap = document.createElement('div');
+      wrap.style.cssText = 'display:flex;align-items:center;gap:8px';
+      var bm = document.createElement('button');
+      bm.style.cssText = btnStyle; bm.textContent = '−';
+      bm.addEventListener('click', (function(c,p){return function(){coAdj(c,p,-5);};})(cyc, paramName));
+      var disp = document.createElement('span');
+      disp.id = displayId; disp.textContent = defVal;
+      disp.style.cssText = 'font-family:Bebas Neue,sans-serif;font-size:1.6rem;color:var(--teal);min-width:44px;text-align:center';
+      var bp = document.createElement('button');
+      bp.style.cssText = btnStyle; bp.textContent = '+';
+      bp.addEventListener('click', (function(c,p){return function(){coAdj(c,p,5);};})(cyc, paramName));
+      wrap.appendChild(bm); wrap.appendChild(disp); wrap.appendChild(bp);
+      row.appendChild(lbl); row.appendChild(wrap);
+      return row;
     }
+    var header = document.createElement('p');
+    header.style.cssText = 'font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:12px';
+    header.textContent = '⚙️ Paramètres évaluation CO';
+    var grid = document.createElement('div');
+    grid.style.cssText = 'display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px';
+    grid.appendChild(mkRow('⏱ Durée (min)', 'duree', 'co-duree-'+cyc, defDuree));
+    grid.appendChild(mkRow('📍 Nb balises total', 'balises', 'co-balises-'+cyc, 30));
+    var barBox = document.createElement('div');
+    barBox.style.cssText = 'background:var(--bg);border-radius:8px;padding:10px 12px';
+    var barLbl = document.createElement('p');
+    barLbl.style.cssText = 'font-size:.72rem;font-weight:600;color:var(--muted);margin-bottom:6px';
+    barLbl.textContent = 'Barème adapté — balises trouvées';
+    var barDiv = document.createElement('div');
+    barDiv.id = 'co-bareme-'+cyc;
+    barBox.appendChild(barLbl); barBox.appendChild(barDiv);
+    cfg.appendChild(header); cfg.appendChild(grid); cfg.appendChild(barBox);
+    var saisieDiv = document.getElementById('course-orientation-'+cyc+'-saisie');
+    if(saisieDiv) block.insertBefore(cfg, saisieDiv);
+    coUpdateBareme(cyc);
   });
 }
 
@@ -1040,41 +1050,6 @@ function buildPanelHTML(s) {
     </div>`;
   });
   return html;
-}
-
-// ═══════════════════════════════════════════════════════
-// CO — Paramètres ajustables
-// ═══════════════════════════════════════════════════════
-const coParams = { c3:{ duree:30, balises:30 }, c4:{ duree:40, balises:30 } };
-
-function coAdj(cyc, param, delta) {
-  const min = param==='duree' ? 10 : 10;
-  const max = param==='duree' ? 60 : 50;
-  coParams[cyc][param] = Math.max(min, Math.min(max, coParams[cyc][param]+delta));
-  const el = document.getElementById('co-'+param+'-'+cyc);
-  if(el) el.textContent = coParams[cyc][param];
-  updateCoBareme(cyc);
-}
-
-function updateCoBareme(cyc) {
-  const el = document.getElementById('co-bareme-'+cyc);
-  if(!el) return;
-  const nb = coParams[cyc].balises;
-  const duree = coParams[cyc].duree;
-  // Seuils en nb de balises absolues (basé sur % × nb total)
-  const seuils = [
-    { label: '/ 7 pts', pts:7, min: Math.round(nb*0.9) },
-    { label: '/ 5–6 pts', pts:'5–6', min: Math.round(nb*0.7) },
-    { label: '/ 3–4 pts', pts:'3–4', min: Math.round(nb*0.5) },
-    { label: '/ 2 pts', pts:2, min: Math.round(nb*0.3) },
-    { label: '/ 1 pt', pts:1, min: 1 },
-  ];
-  el.innerHTML = seuils.map((s,i) => {
-    const next = seuils[i-1];
-    const maxBal = next ? next.min-1 : nb;
-    const range = i===0 ? `≥ ${s.min} balises` : (s.min===1 ? `1–${maxBal} balises` : `${s.min}–${maxBal} balises`);
-    return `<span style="display:inline-block;margin-right:14px;margin-bottom:2px"><strong style="color:var(--teal)">${s.pts}</strong> — ${range}</span>`;
-  }).join('') + `<div style="margin-top:6px;font-size:.7rem;color:var(--muted)">Sur ${duree} min · ${nb} balises posées</div>`;
 }
 
 // ═══════════════════════════════════════════════════════
@@ -1369,43 +1344,41 @@ document.getElementById('modal-overlay').addEventListener('click',e=>{
 });
 
 // ═══════════════════════════════════════════════════════
-// CO — Paramètres ajustables
-// ═══════════════════════════════════════════════════════
-const coParams = { c3:{ duree:30, balises:30 }, c4:{ duree:40, balises:30 } };
-
-function coAdj(cyc, param, delta) {
-  const min = param==='duree' ? 10 : 10;
-  const max = param==='duree' ? 60 : 50;
-  coParams[cyc][param] = Math.max(min, Math.min(max, coParams[cyc][param]+delta));
-  const el = document.getElementById('co-'+param+'-'+cyc);
-  if(el) el.textContent = coParams[cyc][param];
-  updateCoBareme(cyc);
-}
-
-function updateCoBareme(cyc) {
-  const el = document.getElementById('co-bareme-'+cyc);
-  if(!el) return;
-  const nb = coParams[cyc].balises;
-  const duree = coParams[cyc].duree;
-  // Seuils en nb de balises absolues (basé sur % × nb total)
-  const seuils = [
-    { label: '/ 7 pts', pts:7, min: Math.round(nb*0.9) },
-    { label: '/ 5–6 pts', pts:'5–6', min: Math.round(nb*0.7) },
-    { label: '/ 3–4 pts', pts:'3–4', min: Math.round(nb*0.5) },
-    { label: '/ 2 pts', pts:2, min: Math.round(nb*0.3) },
-    { label: '/ 1 pt', pts:1, min: 1 },
-  ];
-  el.innerHTML = seuils.map((s,i) => {
-    const next = seuils[i-1];
-    const maxBal = next ? next.min-1 : nb;
-    const range = i===0 ? `≥ ${s.min} balises` : (s.min===1 ? `1–${maxBal} balises` : `${s.min}–${maxBal} balises`);
-    return `<span style="display:inline-block;margin-right:14px;margin-bottom:2px"><strong style="color:var(--teal)">${s.pts}</strong> — ${range}</span>`;
-  }).join('') + `<div style="margin-top:6px;font-size:.7rem;color:var(--muted)">Sur ${duree} min · ${nb} balises posées</div>`;
-}
-
-// ═══════════════════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════════════════
+var coParams = { c3:{ duree:30, balises:30 }, c4:{ duree:40, balises:30 } };
+
+function coAdj(cyc, param, delta) {
+  var mn = 10, mx = param==='duree' ? 60 : 50;
+  coParams[cyc][param] = Math.max(mn, Math.min(mx, coParams[cyc][param]+delta));
+  var el = document.getElementById('co-'+param+'-'+cyc);
+  if(el) el.textContent = coParams[cyc][param];
+  coUpdateBareme(cyc);
+}
+
+function coUpdateBareme(cyc) {
+  var el = document.getElementById('co-bareme-'+cyc);
+  if(!el) return;
+  var nb = coParams[cyc].balises;
+  var duree = coParams[cyc].duree;
+  var thresholds = [
+    { pts:'7 pts',   min: Math.round(nb*0.9) },
+    { pts:'5-6 pts', min: Math.round(nb*0.7) },
+    { pts:'3-4 pts', min: Math.round(nb*0.5) },
+    { pts:'2 pts',   min: Math.round(nb*0.3) },
+    { pts:'1 pt',    min: 1 }
+  ];
+  var html = '';
+  for(var i=0;i<thresholds.length;i++){
+    var t = thresholds[i];
+    var maxB = i===0 ? nb : thresholds[i-1].min-1;
+    var range = i===0 ? ('≥'+t.min) : (t.min===1 ? '1–'+maxB : t.min+'–'+maxB);
+    html += '<span style="display:inline-block;margin-right:10px;white-space:nowrap"><b style="color:var(--teal)">'+t.pts+'</b> : '+range+' bal.</span>';
+  }
+  html += '<div style="margin-top:5px;font-size:.7rem;color:var(--muted)">'+duree+' min · '+nb+' balises posées</div>';
+  el.innerHTML = html;
+}
+
 buildNav();
 buildPanels();
 buildHome();
